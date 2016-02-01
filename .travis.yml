@@ -1,0 +1,11 @@
+language: node_js
+sudo: false
+env:
+  - POSTGRESQL_CONNECTION="postgres://postgres@localhost/pgee_ci"
+before_script:
+  - psql -c 'create database pgee_ci;' -U postgres
+node_js:
+  - "4"
+  - "5"
+addons:
+  postgresql: "9.4"
