@@ -1,6 +1,6 @@
 {
   "name": "pgee",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "PostgreSQL Asynchronous Notification Event Emitter",
   "author": "Continuation Labs <contact@continuation.io> (http://continuation.io/)",
   "main": "lib/index.js",
