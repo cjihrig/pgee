@@ -208,6 +208,37 @@ describe('pgee', () => {
       });
     });
 
+    it('guards against async race condition', (done) => {
+      const pgee = new PgEe(CONNECT_STRING);
+
+      pgee.connect((err) => {
+        expect(err).to.not.exist();
+        expect(pgee._channels).to.deep.equal([]);
+
+        const originalQuery = pgee._connection.query;
+        let count = 0;
+        const listenCb = (err, channel) => {
+          count++;
+          expect(err).to.not.exist();
+          expect(channel).to.equal('foo');
+          expect(pgee._channels).to.deep.equal(['foo']);
+
+          if (count > 1) {
+            pgee._connection.query = originalQuery;
+            expect(count).to.equal(2);
+            done();
+          }
+        };
+
+        pgee._connection.query = (sql, callback) => {
+          setTimeout(callback, 1000);
+        };
+
+        pgee.listen('foo', listenCb);
+        pgee.listen('foo', listenCb);
+      });
+    });
+
     it('errors if not connected', (done) => {
       const pgee = new PgEe(CONNECT_STRING);
 
@@ -331,6 +362,41 @@ describe('pgee', () => {
             pgee.close();
             done();
           });
+        });
+      });
+    });
+
+    it('guards against async race condition', (done) => {
+      const pgee = new PgEe(CONNECT_STRING);
+
+      pgee.connect((err) => {
+        expect(err).to.not.exist();
+
+        pgee.listen('foo', (err, channel) => {
+          expect(err).to.not.exist();
+          expect(pgee._channels).to.deep.equal(['foo']);
+
+          const originalQuery = pgee._connection.query;
+          let count = 0;
+          const unlistenCb = (err, channel) => {
+            count++;
+            expect(err).to.not.exist();
+            expect(channel).to.equal('foo');
+            expect(pgee._channels).to.deep.equal([]);
+
+            if (count > 1) {
+              pgee._connection.query = originalQuery;
+              expect(count).to.equal(2);
+              done();
+            }
+          };
+
+          pgee._connection.query = (sql, callback) => {
+            setTimeout(callback, 1000);
+          };
+
+          pgee.unlisten('foo', unlistenCb);
+          pgee.unlisten('foo', unlistenCb);
         });
       });
     });
