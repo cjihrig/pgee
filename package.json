@@ -23,12 +23,12 @@
     "test": "test"
   },
   "dependencies": {
-    "pg": "4.4.x"
+    "pg": "4.5.x"
   },
   "devDependencies": {
-    "belly-button": "1.x.x",
-    "code": "2.x.x",
-    "lab": "8.x.x"
+    "belly-button": "2.x.x",
+    "code": "3.x.x",
+    "lab": "10.x.x"
   },
   "keywords": [
     "postgres",
